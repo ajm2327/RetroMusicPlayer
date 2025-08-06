@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import java.text.Collator
 
 
 class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playlist_detail_new) {
@@ -59,6 +60,11 @@ class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playli
     private lateinit var playlistSongAdapter: OrderablePlaylistSongAdapter
 
     private val _searchFlow = MutableSharedFlow<CharSequence?>()
+
+    // Store the original unsorted songs
+    private var originalSongs: List<Song> = emptyList()
+    // Track current sort order (null means custom/original order)
+    private var currentSortOrder: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,7 +101,8 @@ class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playli
             binding.collapsingAppBarLayout.title = playlist.playlistEntity.playlistName
         }
         viewModel.getSongs().observe(viewLifecycleOwner) {
-            songs(it.toSongs())
+            originalSongs = it.toSongs()
+            songs(originalSongs)
         }
         viewModel.playlistExists().observe(viewLifecycleOwner) {
             if (!it) {
@@ -181,10 +188,96 @@ class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playli
 
     override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_playlist_detail, menu)
+        // Set the checked state based on current sort order
+        menu.findItem(R.id.action_sort_order)?.subMenu?.let { sortMenu ->
+            when (currentSortOrder) {
+                null -> sortMenu.findItem(R.id.action_sort_order_custom)?.isChecked = true
+                SORT_ORDER_TITLE -> sortMenu.findItem(R.id.action_sort_order_title)?.isChecked = true
+                SORT_ORDER_TITLE_DESC -> sortMenu.findItem(R.id.action_sort_order_title_desc)?.isChecked = true
+                SORT_ORDER_ARTIST -> sortMenu.findItem(R.id.action_sort_order_artist)?.isChecked = true
+                SORT_ORDER_ALBUM -> sortMenu.findItem(R.id.action_sort_order_album)?.isChecked = true
+                SORT_ORDER_YEAR -> sortMenu.findItem(R.id.action_sort_order_year)?.isChecked = true
+                SORT_ORDER_DATE -> sortMenu.findItem(R.id.action_sort_order_date)?.isChecked = true
+                SORT_ORDER_DURATION -> sortMenu.findItem(R.id.action_sort_order_duration)?.isChecked = true
+            }
+        }
     }
 
     override fun onMenuItemSelected(item: MenuItem): Boolean {
-        return PlaylistMenuHelper.handleMenuClick(requireActivity(), playlist, item)
+        when (item.itemId) {
+            R.id.action_sort_order_custom -> {
+                currentSortOrder = null
+                songs(originalSongs)
+                item.isChecked = true
+                return true
+            }
+            R.id.action_sort_order_title -> {
+                currentSortOrder = SORT_ORDER_TITLE
+                applySortOrder()
+                item.isChecked = true
+                return true
+            }
+            R.id.action_sort_order_title_desc -> {
+                currentSortOrder = SORT_ORDER_TITLE_DESC
+                applySortOrder()
+                item.isChecked = true
+                return true
+            }
+            R.id.action_sort_order_artist -> {
+                currentSortOrder = SORT_ORDER_ARTIST
+                applySortOrder()
+                item.isChecked = true
+                return true
+            }
+            R.id.action_sort_order_album -> {
+                currentSortOrder = SORT_ORDER_ALBUM
+                applySortOrder()
+                item.isChecked = true
+                return true
+            }
+            R.id.action_sort_order_year -> {
+                currentSortOrder = SORT_ORDER_YEAR
+                applySortOrder()
+                item.isChecked = true
+                return true
+            }
+            R.id.action_sort_order_date -> {
+                currentSortOrder = SORT_ORDER_DATE
+                applySortOrder()
+                item.isChecked = true
+                return true
+            }
+            R.id.action_sort_order_duration -> {
+                currentSortOrder = SORT_ORDER_DURATION
+                applySortOrder()
+                item.isChecked = true
+                return true
+            }
+            else -> return PlaylistMenuHelper.handleMenuClick(requireActivity(), playlist, item)
+        }
+    }
+
+    private fun applySortOrder() {
+        val collator = Collator.getInstance()
+        val sortedSongs = when (currentSortOrder) {
+            SORT_ORDER_TITLE -> originalSongs.sortedWith { o1, o2 ->
+                collator.compare(o1.title, o2.title)
+            }
+            SORT_ORDER_TITLE_DESC -> originalSongs.sortedWith { o1, o2 ->
+                collator.compare(o2.title, o1.title)
+            }
+            SORT_ORDER_ARTIST -> originalSongs.sortedWith { o1, o2 ->
+                collator.compare(o1.artistName, o2.artistName)
+            }
+            SORT_ORDER_ALBUM -> originalSongs.sortedWith { o1, o2 ->
+                collator.compare(o1.albumName, o2.albumName)
+            }
+            SORT_ORDER_YEAR -> originalSongs.sortedByDescending { it.year }
+            SORT_ORDER_DATE -> originalSongs.sortedByDescending { it.dateModified }
+            SORT_ORDER_DURATION -> originalSongs.sortedByDescending { it.duration }
+            else -> originalSongs
+        }
+        songs(sortedSongs)
     }
 
     private fun checkIsEmpty() {
@@ -230,5 +323,15 @@ class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playli
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        private const val SORT_ORDER_TITLE = "title"
+        private const val SORT_ORDER_TITLE_DESC = "title_desc"
+        private const val SORT_ORDER_ARTIST = "artist"
+        private const val SORT_ORDER_ALBUM = "album"
+        private const val SORT_ORDER_YEAR = "year"
+        private const val SORT_ORDER_DATE = "date"
+        private const val SORT_ORDER_DURATION = "duration"
     }
 }

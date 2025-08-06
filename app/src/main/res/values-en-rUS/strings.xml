@@ -543,6 +543,10 @@
     <string name="sort_order_date_modified">Date modified</string>
     <string name="sort_order_year">Year</string>
     <string name="sort_order_z_a">Descending</string>
+    <string name="sort_order_custom">Custom order</string>
+    <string name="sort_order_duration">Duration</string>
+
+
 
     <string name="speech_not_supported">Sorry! Your device doesn\'t support speech input</string>
     <string name="speech_prompt">Search your library</string>
