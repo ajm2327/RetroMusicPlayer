@@ -20,7 +20,8 @@ import code.name.monkey.retromusic.helper.SortOrder
 import code.name.monkey.retromusic.model.Album
 import code.name.monkey.retromusic.model.Artist
 import code.name.monkey.retromusic.util.PreferenceUtil
-import java.text.Collator
+import code.name.monkey.retromusic.util.SortingUtil
+import code.name.monkey.retromusic.fragments.artists.ArtistsFragment
 
 interface ArtistRepository {
     fun artists(): List<Artist>
@@ -42,7 +43,14 @@ class RealArtistRepository(
 ) : ArtistRepository {
 
     private fun getSongLoaderSortOrder(): String {
-        return PreferenceUtil.artistSortOrder + ", " +
+        // Convert custom sort orders to valid MediaStore sort orders
+        val artistSortOrder = when (PreferenceUtil.artistSortOrder) {
+            ArtistsFragment.ARTIST_A_Z_LAST_NAME -> SortOrder.ArtistSortOrder.ARTIST_A_Z
+            ArtistsFragment.ARTIST_Z_A_LAST_NAME -> SortOrder.ArtistSortOrder.ARTIST_Z_A
+            else -> PreferenceUtil.artistSortOrder
+        }
+
+        return artistSortOrder + ", " +
                 PreferenceUtil.artistAlbumSortOrder + ", " +
                 PreferenceUtil.artistSongSortOrder
     }
@@ -172,13 +180,34 @@ class RealArtistRepository(
     }
 
     private fun sortArtists(artists: List<Artist>): List<Artist> {
-        val collator = Collator.getInstance()
         return when (PreferenceUtil.artistSortOrder) {
             SortOrder.ArtistSortOrder.ARTIST_A_Z -> {
-                artists.sortedWith { a1, a2 -> collator.compare(a1.name, a2.name) }
+                artists.sortedWith { a1, a2 ->
+                    val name1 = SortingUtil.getSortableString(a1.name)
+                    val name2 = SortingUtil.getSortableString(a2.name)
+                    SortingUtil.compare(name1, name2)
+                }
             }
             SortOrder.ArtistSortOrder.ARTIST_Z_A -> {
-                artists.sortedWith { a1, a2 -> collator.compare(a2.name, a1.name) }
+                artists.sortedWith { a1, a2 ->
+                    val name1 = SortingUtil.getSortableString(a1.name)
+                    val name2 = SortingUtil.getSortableString(a2.name)
+                    SortingUtil.compare(name2, name1)
+                }
+            }
+            ArtistsFragment.ARTIST_A_Z_LAST_NAME -> {
+                artists.sortedWith { a1, a2 ->
+                    val name1 = SortingUtil.getLastName(a1.name)
+                    val name2 = SortingUtil.getLastName(a2.name)
+                    SortingUtil.compare(name1, name2)
+                }
+            }
+            ArtistsFragment.ARTIST_Z_A_LAST_NAME -> {
+                artists.sortedWith { a1, a2 ->
+                    val name1 = SortingUtil.getLastName(a1.name)
+                    val name2 = SortingUtil.getLastName(a2.name)
+                    SortingUtil.compare(name2, name1)
+                }
             }
             else -> artists
         }

@@ -31,6 +31,8 @@ import code.name.monkey.retromusic.helper.menu.PlaylistMenuHelper
 import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.util.MusicUtil
 import code.name.monkey.retromusic.util.PreferenceUtil
+import code.name.monkey.retromusic.util.SortingUtil
+import code.name.monkey.retromusic.util.ArtistSortMode
 import code.name.monkey.retromusic.util.ThemedFastScroller
 import com.bumptech.glide.Glide
 import com.google.android.material.shape.MaterialShapeDrawable
@@ -44,7 +46,6 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import java.text.Collator
 
 
 class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playlist_detail_new) {
@@ -65,6 +66,8 @@ class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playli
     private var originalSongs: List<Song> = emptyList()
     // Track current sort order (null means custom/original order)
     private var currentSortOrder: String? = null
+    // Track artist sort mode
+    private var artistSortMode: ArtistSortMode = ArtistSortMode.NAME
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,7 +87,6 @@ class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playli
         mainActivity.setSupportActionBar(binding.toolbar)
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
         binding.toolbar.title = null
-//        binding.container.transitionName = playlist.playlistEntity.playlistName
 
         setUpRecyclerView()
         setUpSearch()
@@ -195,6 +197,7 @@ class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playli
                 SORT_ORDER_TITLE -> sortMenu.findItem(R.id.action_sort_order_title)?.isChecked = true
                 SORT_ORDER_TITLE_DESC -> sortMenu.findItem(R.id.action_sort_order_title_desc)?.isChecked = true
                 SORT_ORDER_ARTIST -> sortMenu.findItem(R.id.action_sort_order_artist)?.isChecked = true
+                SORT_ORDER_ARTIST_LAST_NAME -> sortMenu.findItem(R.id.action_sort_order_artist_last_name)?.isChecked = true
                 SORT_ORDER_ALBUM -> sortMenu.findItem(R.id.action_sort_order_album)?.isChecked = true
                 SORT_ORDER_YEAR -> sortMenu.findItem(R.id.action_sort_order_year)?.isChecked = true
                 SORT_ORDER_DATE -> sortMenu.findItem(R.id.action_sort_order_date)?.isChecked = true
@@ -225,6 +228,14 @@ class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playli
             }
             R.id.action_sort_order_artist -> {
                 currentSortOrder = SORT_ORDER_ARTIST
+                artistSortMode = ArtistSortMode.NAME
+                applySortOrder()
+                item.isChecked = true
+                return true
+            }
+            R.id.action_sort_order_artist_last_name -> {
+                currentSortOrder = SORT_ORDER_ARTIST_LAST_NAME
+                artistSortMode = ArtistSortMode.LAST_NAME
                 applySortOrder()
                 item.isChecked = true
                 return true
@@ -258,19 +269,39 @@ class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playli
     }
 
     private fun applySortOrder() {
-        val collator = Collator.getInstance()
         val sortedSongs = when (currentSortOrder) {
             SORT_ORDER_TITLE -> originalSongs.sortedWith { o1, o2 ->
-                collator.compare(o1.title, o2.title)
+                val title1 = SortingUtil.getSortableString(o1.title, o1.titleSort)
+                val title2 = SortingUtil.getSortableString(o2.title, o2.titleSort)
+                SortingUtil.compare(title1, title2)
             }
             SORT_ORDER_TITLE_DESC -> originalSongs.sortedWith { o1, o2 ->
-                collator.compare(o2.title, o1.title)
+                val title1 = SortingUtil.getSortableString(o1.title, o1.titleSort)
+                val title2 = SortingUtil.getSortableString(o2.title, o2.titleSort)
+                SortingUtil.compare(title2, title1)
             }
             SORT_ORDER_ARTIST -> originalSongs.sortedWith { o1, o2 ->
-                collator.compare(o1.artistName, o2.artistName)
+                val artist1 = SortingUtil.getSortableString(o1.artistName, o1.artistSort)
+                val artist2 = SortingUtil.getSortableString(o2.artistName, o2.artistSort)
+                SortingUtil.compare(artist1, artist2)
+            }
+            SORT_ORDER_ARTIST_LAST_NAME -> originalSongs.sortedWith { o1, o2 ->
+                val artist1 = if (o1.artistSort.isNullOrBlank()) {
+                    SortingUtil.getLastName(o1.artistName)
+                } else {
+                    o1.artistSort
+                }
+                val artist2 = if (o2.artistSort.isNullOrBlank()) {
+                    SortingUtil.getLastName(o2.artistName)
+                } else {
+                    o2.artistSort
+                }
+                SortingUtil.compare(artist1, artist2)
             }
             SORT_ORDER_ALBUM -> originalSongs.sortedWith { o1, o2 ->
-                collator.compare(o1.albumName, o2.albumName)
+                val album1 = SortingUtil.getSortableString(o1.albumName, o1.albumSort)
+                val album2 = SortingUtil.getSortableString(o2.albumName, o2.albumSort)
+                SortingUtil.compare(album1, album2)
             }
             SORT_ORDER_YEAR -> originalSongs.sortedByDescending { it.year }
             SORT_ORDER_DATE -> originalSongs.sortedByDescending { it.dateModified }
@@ -329,6 +360,7 @@ class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playli
         private const val SORT_ORDER_TITLE = "title"
         private const val SORT_ORDER_TITLE_DESC = "title_desc"
         private const val SORT_ORDER_ARTIST = "artist"
+        private const val SORT_ORDER_ARTIST_LAST_NAME = "artist_last_name"
         private const val SORT_ORDER_ALBUM = "album"
         private const val SORT_ORDER_YEAR = "year"
         private const val SORT_ORDER_DATE = "date"

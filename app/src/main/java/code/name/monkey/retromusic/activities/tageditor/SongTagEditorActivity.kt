@@ -81,6 +81,11 @@ class SongTagEditorActivity : AbsTagEditorActivity<ActivitySongTagEditorBinding>
         binding.discNumberContainer.setTint(false)
         binding.lyricsContainer.setTint(false)
 
+        binding.songSortContainer?.setTint(false)
+        binding.artistSortContainer?.setTint(false)
+        binding.albumSortContainer?.setTint(false)
+        binding.albumArtistSortContainer?.setTint(false)
+
         binding.songText.appHandleColor().doAfterTextChanged { dataChanged() }
         binding.albumText.appHandleColor().doAfterTextChanged { dataChanged() }
         binding.albumArtistText.appHandleColor().doAfterTextChanged { dataChanged() }
@@ -91,6 +96,11 @@ class SongTagEditorActivity : AbsTagEditorActivity<ActivitySongTagEditorBinding>
         binding.discNumberText.appHandleColor().doAfterTextChanged { dataChanged() }
         binding.lyricsText.appHandleColor().doAfterTextChanged { dataChanged() }
         binding.songComposerText.appHandleColor().doAfterTextChanged { dataChanged() }
+
+        binding.songSortText?.appHandleColor()?.doAfterTextChanged { dataChanged() }
+        binding.artistSortText?.appHandleColor()?.doAfterTextChanged { dataChanged() }
+        binding.albumSortText?.appHandleColor()?.doAfterTextChanged { dataChanged() }
+        binding.albumArtistSortText?.appHandleColor()?.doAfterTextChanged { dataChanged() }
     }
 
     private fun fillViewsWithFileTags() {
@@ -104,6 +114,12 @@ class SongTagEditorActivity : AbsTagEditorActivity<ActivitySongTagEditorBinding>
         binding.discNumberText.setText(discNumber)
         binding.lyricsText.setText(lyrics)
         binding.songComposerText.setText(composer)
+
+        binding.songSortText?.setText(songTitleSort)
+        binding.artistSortText?.setText(artistNameSort)
+        binding.albumSortText?.setText(albumTitleSort)
+        binding.albumArtistSortText?.setText(albumArtistSort)
+
         logD(songTitle + songYear)
     }
 
@@ -157,6 +173,20 @@ class SongTagEditorActivity : AbsTagEditorActivity<ActivitySongTagEditorBinding>
         fieldKeyValueMap[FieldKey.LYRICS] = binding.lyricsText.text.toString()
         fieldKeyValueMap[FieldKey.ALBUM_ARTIST] = binding.albumArtistText.text.toString()
         fieldKeyValueMap[FieldKey.COMPOSER] = binding.songComposerText.text.toString()
+
+        binding.songSortText?.text?.toString()?.let {
+            fieldKeyValueMap[FieldKey.TITLE_SORT] = it
+        }
+        binding.artistSortText?.text?.toString()?.let {
+            fieldKeyValueMap[FieldKey.ARTIST_SORT] = it
+        }
+        binding.albumSortText?.text?.toString()?.let {
+            fieldKeyValueMap[FieldKey.ALBUM_SORT] = it
+        }
+        binding.albumArtistSortText?.text?.toString()?.let {
+            fieldKeyValueMap[FieldKey.ALBUM_ARTIST_SORT] = it
+        }
+
         writeValuesToFiles(
             fieldKeyValueMap, when {
                 deleteAlbumArt -> ArtworkInfo(id, null)

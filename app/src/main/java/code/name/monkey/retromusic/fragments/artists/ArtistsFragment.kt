@@ -127,6 +127,9 @@ class ArtistsFragment : AbsRecyclerViewCustomGridSizeFragment<ArtistAdapter, Gri
     }
 
     companion object {
+        // Add new sort constants
+        const val ARTIST_A_Z_LAST_NAME = "artist_a_z_last_name"
+        const val ARTIST_Z_A_LAST_NAME = "artist_z_a_last_name"
 
         fun newInstance(): ArtistsFragment {
             return ArtistsFragment()
@@ -192,6 +195,18 @@ class ArtistsFragment : AbsRecyclerViewCustomGridSizeFragment<ArtistAdapter, Gri
             1,
             R.string.sort_order_z_a
         ).isChecked = currentSortOrder.equals(ArtistSortOrder.ARTIST_Z_A)
+        sortOrderMenu.add(
+            0,
+            R.id.action_artist_sort_order_asc_last_name,
+            2,
+            R.string.sort_order_a_z_last_name
+        ).isChecked = currentSortOrder.equals(ARTIST_A_Z_LAST_NAME)
+        sortOrderMenu.add(
+            0,
+            R.id.action_artist_sort_order_desc_last_name,
+            3,
+            R.string.sort_order_z_a_last_name
+        ).isChecked = currentSortOrder.equals(ARTIST_Z_A_LAST_NAME)
         sortOrderMenu.setGroupCheckable(0, true, true)
     }
 
@@ -279,6 +294,8 @@ class ArtistsFragment : AbsRecyclerViewCustomGridSizeFragment<ArtistAdapter, Gri
         val sortOrder: String = when (item.itemId) {
             R.id.action_artist_sort_order_asc -> ArtistSortOrder.ARTIST_A_Z
             R.id.action_artist_sort_order_desc -> ArtistSortOrder.ARTIST_Z_A
+            R.id.action_artist_sort_order_asc_last_name -> ARTIST_A_Z_LAST_NAME
+            R.id.action_artist_sort_order_desc_last_name -> ARTIST_Z_A_LAST_NAME
             else -> PreferenceUtil.artistSortOrder
         }
         if (sortOrder != PreferenceUtil.artistSortOrder) {

@@ -1,3 +1,4 @@
+//ALBUM REPO BACKUP:
 /*
  * Copyright (c) 2019 Hemanth Savarala.
  *
@@ -19,7 +20,9 @@ import code.name.monkey.retromusic.helper.SortOrder
 import code.name.monkey.retromusic.model.Album
 import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.util.PreferenceUtil
+import code.name.monkey.retromusic.util.SortingUtil
 import java.text.Collator
+import code.name.monkey.retromusic.fragments.albums.AlbumsFragment
 
 
 /**
@@ -77,16 +80,58 @@ class RealAlbumRepository(private val songRepository: RealSongRepository) :
     ): List<Album> {
         val grouped = songs.groupBy { it.albumId }.map { Album(it.key, it.value) }
         if (!sorted) return grouped
-        val collator = Collator.getInstance()
+
         return when (PreferenceUtil.albumSortOrder) {
             SortOrder.AlbumSortOrder.ALBUM_A_Z -> {
-                grouped.sortedWith { a1, a2 -> collator.compare(a1.title, a2.title) }
+                grouped.sortedWith { a1, a2 ->
+                    val album1Sort = a1.songs.firstOrNull()?.albumSort
+                    val album2Sort = a2.songs.firstOrNull()?.albumSort
+                    val name1 = SortingUtil.getSortableString(a1.title, album1Sort)
+                    val name2 = SortingUtil.getSortableString(a2.title, album2Sort)
+                    SortingUtil.compare(name1, name2)
+                }
             }
             SortOrder.AlbumSortOrder.ALBUM_Z_A -> {
-                grouped.sortedWith { a1, a2 -> collator.compare(a2.title, a1.title) }
+                grouped.sortedWith { a1, a2 ->
+                    val album1Sort = a1.songs.firstOrNull()?.albumSort
+                    val album2Sort = a2.songs.firstOrNull()?.albumSort
+                    val name1 = SortingUtil.getSortableString(a1.title, album1Sort)
+                    val name2 = SortingUtil.getSortableString(a2.title, album2Sort)
+                    SortingUtil.compare(name2, name1)
+                }
+            }
+            AlbumsFragment.ALBUM_SORT_ORDER_ARTIST -> {
+                grouped.sortedWith { a1, a2 ->
+                    val artist1Sort = a1.songs.firstOrNull()?.artistSort
+                    val artist2Sort = a2.songs.firstOrNull()?.artistSort
+                    val name1 = SortingUtil.getSortableString(a1.artistName, artist1Sort)
+                    val name2 = SortingUtil.getSortableString(a2.artistName, artist2Sort)
+                    SortingUtil.compare(name1, name2)
+                }
+            }
+            AlbumsFragment.ALBUM_SORT_ORDER_ARTIST_LAST_NAME -> {
+                grouped.sortedWith { a1, a2 ->
+                    val artist1 = if (a1.songs.firstOrNull()?.artistSort.isNullOrBlank()) {
+                        SortingUtil.getLastName(a1.artistName)
+                    } else {
+                        a1.songs.firstOrNull()?.artistSort ?: a1.artistName
+                    }
+                    val artist2 = if (a2.songs.firstOrNull()?.artistSort.isNullOrBlank()) {
+                        SortingUtil.getLastName(a2.artistName)
+                    } else {
+                        a2.songs.firstOrNull()?.artistSort ?: a2.artistName
+                    }
+                    SortingUtil.compare(artist1, artist2)
+                }
             }
             SortOrder.AlbumSortOrder.ALBUM_ARTIST -> {
-                grouped.sortedWith { a1, a2 -> collator.compare(a1.albumArtist, a2.albumArtist) }
+                grouped.sortedWith { a1, a2 ->
+                    val artist1Sort = a1.songs.firstOrNull()?.albumArtistSort ?: a1.songs.firstOrNull()?.artistSort
+                    val artist2Sort = a2.songs.firstOrNull()?.albumArtistSort ?: a2.songs.firstOrNull()?.artistSort
+                    val name1 = SortingUtil.getSortableString(a1.albumArtist ?: a1.artistName, artist1Sort)
+                    val name2 = SortingUtil.getSortableString(a2.albumArtist ?: a2.artistName, artist2Sort)
+                    SortingUtil.compare(name1, name2)
+                }
             }
             SortOrder.AlbumSortOrder.ALBUM_NUMBER_OF_SONGS -> {
                 grouped.sortedByDescending { it.songCount }
@@ -117,8 +162,12 @@ class RealAlbumRepository(private val songRepository: RealSongRepository) :
 
     private fun getSongLoaderSortOrder(): String {
         var albumSortOrder = PreferenceUtil.albumSortOrder
-        if (albumSortOrder == SortOrder.AlbumSortOrder.ALBUM_NUMBER_OF_SONGS)
-            albumSortOrder = SortOrder.AlbumSortOrder.ALBUM_A_Z
+        // Convert custom sort orders to valid MediaStore sort orders
+        when (albumSortOrder) {
+            AlbumsFragment.ALBUM_SORT_ORDER_ARTIST -> albumSortOrder = "artist"
+            AlbumsFragment.ALBUM_SORT_ORDER_ARTIST_LAST_NAME -> albumSortOrder = "artist"
+            SortOrder.AlbumSortOrder.ALBUM_NUMBER_OF_SONGS -> albumSortOrder = SortOrder.AlbumSortOrder.ALBUM_A_Z
+        }
         return albumSortOrder + ", " +
                 PreferenceUtil.albumSongSortOrder
     }

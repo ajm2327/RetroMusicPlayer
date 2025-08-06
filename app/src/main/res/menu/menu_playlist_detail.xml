@@ -26,6 +26,9 @@
                     android:id="@+id/action_sort_order_artist"
                     android:title="@string/sort_order_artist" />
                 <item
+                    android:id="@+id/action_sort_order_artist_last_name"
+                    android:title="@string/sort_order_artist_last_name" />
+                <item
                     android:id="@+id/action_sort_order_album"
                     android:title="@string/sort_order_album" />
                 <item

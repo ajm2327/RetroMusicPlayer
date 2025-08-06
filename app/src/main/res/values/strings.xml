@@ -573,4 +573,7 @@
     <string name="your_account_data_is_only_used_for_authentication">Your account data is only used for authentication.</string>
     <string name="could_not_write_tags_to_file">Could not write tags to the music file!</string>
     <string name="sleep_timer_no_permission">No permission to schedule alarms, please allow Retro Music.</string>
+    <string name="sort_order_artist_last_name">Artist (Last Name)</string>
+    <string name="sort_order_a_z_last_name">A-Z (Last Name)</string>
+    <string name="sort_order_z_a_last_name">Z-A (Last Name)</string>
 </resources>

@@ -31,7 +31,12 @@ open class Song(
     open val artistId: Long,
     open val artistName: String,
     open val composer: String?,
-    open val albumArtist: String?
+    open val albumArtist: String?,
+    // Add sort tag fields
+    open val titleSort: String? = null,
+    open val artistSort: String? = null,
+    open val albumSort: String? = null,
+    open val albumArtistSort: String? = null
 ) : Parcelable {
 
 
@@ -55,6 +60,10 @@ open class Song(
         if (artistName != other.artistName) return false
         if (composer != other.composer) return false
         if (albumArtist != other.albumArtist) return false
+        if (titleSort != other.titleSort) return false
+        if (artistSort != other.artistSort) return false
+        if (albumSort != other.albumSort) return false
+        if (albumArtistSort != other.albumArtistSort) return false
 
         return true
     }
@@ -73,6 +82,10 @@ open class Song(
         result = 31 * result + artistName.hashCode()
         result = 31 * result + (composer?.hashCode() ?: 0)
         result = 31 * result + (albumArtist?.hashCode() ?: 0)
+        result = 31 * result + (titleSort?.hashCode() ?: 0)
+        result = 31 * result + (artistSort?.hashCode() ?: 0)
+        result = 31 * result + (albumSort?.hashCode() ?: 0)
+        result = 31 * result + (albumArtistSort?.hashCode() ?: 0)
         return result
     }
 
@@ -93,7 +106,11 @@ open class Song(
             artistId = -1,
             artistName = "",
             composer = "",
-            albumArtist = ""
+            albumArtist = "",
+            titleSort = null,
+            artistSort = null,
+            albumSort = null,
+            albumArtistSort = null
         )
     }
 }

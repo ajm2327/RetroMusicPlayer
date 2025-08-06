@@ -33,6 +33,8 @@ import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.providers.BlacklistStore
 import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.getExternalStoragePublicDirectory
+import code.name.monkey.retromusic.util.SortingUtil
+import code.name.monkey.retromusic.fragments.songs.SongsFragment
 import java.text.Collator
 
 /**
@@ -73,26 +75,62 @@ class RealSongRepository(private val context: Context) : SongRepository {
     }
 
     override fun sortedSongs(cursor: Cursor?): List<Song> {
-        val collator = Collator.getInstance()
         val songs = songs(cursor)
         return when (PreferenceUtil.songSortOrder) {
             SortOrder.SongSortOrder.SONG_A_Z -> {
-                songs.sortedWith{ s1, s2 -> collator.compare(s1.title, s2.title) }
+                songs.sortedWith { s1, s2 ->
+                    val title1 = SortingUtil.getSortableString(s1.title, s1.titleSort)
+                    val title2 = SortingUtil.getSortableString(s2.title, s2.titleSort)
+                    SortingUtil.compare(title1, title2)
+                }
             }
             SortOrder.SongSortOrder.SONG_Z_A -> {
-                songs.sortedWith{ s1, s2 -> collator.compare(s2.title, s1.title) }
+                songs.sortedWith { s1, s2 ->
+                    val title1 = SortingUtil.getSortableString(s1.title, s1.titleSort)
+                    val title2 = SortingUtil.getSortableString(s2.title, s2.titleSort)
+                    SortingUtil.compare(title2, title1)
+                }
             }
             SortOrder.SongSortOrder.SONG_ALBUM -> {
-                songs.sortedWith{ s1, s2 -> collator.compare(s1.albumName, s2.albumName) }
+                songs.sortedWith { s1, s2 ->
+                    val album1 = SortingUtil.getSortableString(s1.albumName, s1.albumSort)
+                    val album2 = SortingUtil.getSortableString(s2.albumName, s2.albumSort)
+                    SortingUtil.compare(album1, album2)
+                }
             }
             SortOrder.SongSortOrder.SONG_ALBUM_ARTIST -> {
-                songs.sortedWith{ s1, s2 -> collator.compare(s1.albumArtist, s2.albumArtist) }
+                songs.sortedWith { s1, s2 ->
+                    val artist1 = SortingUtil.getSortableString(s1.albumArtist ?: s1.artistName, s1.albumArtistSort ?: s1.artistSort)
+                    val artist2 = SortingUtil.getSortableString(s2.albumArtist ?: s2.artistName, s2.albumArtistSort ?: s2.artistSort)
+                    SortingUtil.compare(artist1, artist2)
+                }
             }
             SortOrder.SongSortOrder.SONG_ARTIST -> {
-                songs.sortedWith{ s1, s2 -> collator.compare(s1.artistName, s2.artistName) }
+                songs.sortedWith { s1, s2 ->
+                    val artist1 = SortingUtil.getSortableString(s1.artistName, s1.artistSort)
+                    val artist2 = SortingUtil.getSortableString(s2.artistName, s2.artistSort)
+                    SortingUtil.compare(artist1, artist2)
+                }
+            }
+            SongsFragment.SONG_ARTIST_LAST_NAME -> {
+                songs.sortedWith { s1, s2 ->
+                    val artist1 = if (s1.artistSort.isNullOrBlank()) {
+                        SortingUtil.getLastName(s1.artistName)
+                    } else {
+                        s1.artistSort
+                    }
+                    val artist2 = if (s2.artistSort.isNullOrBlank()) {
+                        SortingUtil.getLastName(s2.artistName)
+                    } else {
+                        s2.artistSort
+                    }
+                    SortingUtil.compare(artist1, artist2)
+                }
             }
             SortOrder.SongSortOrder.COMPOSER -> {
-                songs.sortedWith{ s1, s2 -> collator.compare(s1.composer, s2.composer) }
+                songs.sortedWith { s1, s2 ->
+                    SortingUtil.compare(s1.composer, s2.composer)
+                }
             }
             else -> songs
         }
@@ -142,6 +180,10 @@ class RealSongRepository(private val context: Context) : SongRepository {
         val artistName = cursor.getStringOrNull(AudioColumns.ARTIST)
         val composer = cursor.getStringOrNull(AudioColumns.COMPOSER)
         val albumArtist = cursor.getStringOrNull("album_artist")
+
+        // Note: MediaStore doesn't provide sort tags directly
+        // These would need to be read from the actual file tags
+        // For now, we'll pass null and rely on the fallback logic
         return Song(
             id,
             title,
@@ -155,7 +197,11 @@ class RealSongRepository(private val context: Context) : SongRepository {
             artistId,
             artistName ?: "",
             composer ?: "",
-            albumArtist ?: ""
+            albumArtist ?: "",
+            titleSort = null,  // Would need to read from file
+            artistSort = null, // Would need to read from file
+            albumSort = null,  // Would need to read from file
+            albumArtistSort = null // Would need to read from file
         )
     }
 
@@ -166,6 +212,12 @@ class RealSongRepository(private val context: Context) : SongRepository {
         sortOrder: String = PreferenceUtil.songSortOrder,
         ignoreBlacklist: Boolean = false
     ): Cursor? {
+        // Convert custom sort orders to valid MediaStore sort orders
+        val validSortOrder = when (sortOrder) {
+            SongsFragment.SONG_ARTIST_LAST_NAME -> SortOrder.SongSortOrder.SONG_ARTIST
+            else -> sortOrder
+        }
+
         var selectionFinal = selection
         var selectionValuesFinal = selectionValues
         if (!ignoreBlacklist) {
@@ -207,7 +259,7 @@ class RealSongRepository(private val context: Context) : SongRepository {
                 baseProjection,
                 selectionFinal,
                 selectionValuesFinal,
-                sortOrder
+                validSortOrder  // Use the valid sort order
             )
         } catch (ex: SecurityException) {
             return null

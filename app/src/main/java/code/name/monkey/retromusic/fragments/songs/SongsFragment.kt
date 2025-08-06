@@ -1,5 +1,5 @@
 /*
- * Cop()yright (c) 2020 Hemanth Savarla.
+ * Copyright (c) 2020 Hemanth Savarla.
  *
  * Licensed under the GNU General Public License v3
  *
@@ -135,63 +135,70 @@ class SongsFragment : AbsRecyclerViewCustomGridSizeFragment<SongAdapter, GridLay
         sortOrderMenu.add(
             0,
             R.id.action_song_sort_order_asc,
-            0,
+            1,
             R.string.sort_order_a_z
         ).isChecked =
             currentSortOrder == SongSortOrder.SONG_A_Z
         sortOrderMenu.add(
             0,
             R.id.action_song_sort_order_desc,
-            1,
+            2,
             R.string.sort_order_z_a
         ).isChecked =
             currentSortOrder == SongSortOrder.SONG_Z_A
         sortOrderMenu.add(
             0,
             R.id.action_song_sort_order_artist,
-            2,
+            3,
             R.string.sort_order_artist
         ).isChecked =
             currentSortOrder == SongSortOrder.SONG_ARTIST
         sortOrderMenu.add(
             0,
+            R.id.action_song_sort_order_artist_last_name,
+            4,
+            R.string.sort_order_artist_last_name
+        ).isChecked =
+            currentSortOrder == SONG_ARTIST_LAST_NAME
+        sortOrderMenu.add(
+            0,
             R.id.action_song_sort_order_album,
-            3,
+            5,
             R.string.sort_order_album
         ).isChecked =
             currentSortOrder == SongSortOrder.SONG_ALBUM
         sortOrderMenu.add(
             0,
             R.id.action_song_sort_order_year,
-            4,
+            6,
             R.string.sort_order_year
         ).isChecked =
             currentSortOrder == SongSortOrder.SONG_YEAR
         sortOrderMenu.add(
             0,
             R.id.action_song_sort_order_date,
-            5,
+            7,
             R.string.sort_order_date
         ).isChecked =
             currentSortOrder == SongSortOrder.SONG_DATE
         sortOrderMenu.add(
             0,
             R.id.action_song_sort_order_date_modified,
-            6,
+            8,
             R.string.sort_order_date_modified
         ).isChecked =
             currentSortOrder == SongSortOrder.SONG_DATE_MODIFIED
         sortOrderMenu.add(
             0,
             R.id.action_song_sort_order_composer,
-            7,
+            9,
             R.string.sort_order_composer
         ).isChecked =
             currentSortOrder == SongSortOrder.COMPOSER
         sortOrderMenu.add(
             0,
             R.id.action_song_sort_order_album_artist,
-            8,
+            10,
             R.string.album_artist
         ).isChecked =
             currentSortOrder == SongSortOrder.SONG_ALBUM_ARTIST
@@ -264,6 +271,7 @@ class SongsFragment : AbsRecyclerViewCustomGridSizeFragment<SongAdapter, GridLay
             R.id.action_song_sort_order_asc -> SongSortOrder.SONG_A_Z
             R.id.action_song_sort_order_desc -> SongSortOrder.SONG_Z_A
             R.id.action_song_sort_order_artist -> SongSortOrder.SONG_ARTIST
+            R.id.action_song_sort_order_artist_last_name -> SONG_ARTIST_LAST_NAME
             R.id.action_song_sort_order_album_artist -> SongSortOrder.SONG_ALBUM_ARTIST
             R.id.action_song_sort_order_album -> SongSortOrder.SONG_ALBUM
             R.id.action_song_sort_order_year -> SongSortOrder.SONG_YEAR
@@ -329,6 +337,8 @@ class SongsFragment : AbsRecyclerViewCustomGridSizeFragment<SongAdapter, GridLay
     }
 
     companion object {
+        const val SONG_ARTIST_LAST_NAME = "song_artist_last_name"
+
         @JvmField
         var TAG: String = SongsFragment::class.java.simpleName
 

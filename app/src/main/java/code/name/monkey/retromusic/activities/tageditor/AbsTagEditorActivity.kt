@@ -225,6 +225,48 @@ abstract class AbsTagEditorActivity<VB : ViewBinding> : AbsBaseActivity() {
             }
         }
 
+    // Add these properties after the existing tag getters (around line 200)
+
+    protected val songTitleSort: String?
+        get() {
+            return try {
+                getAudioFile(songPaths!![0]).tagOrCreateAndSetDefault.getFirst(FieldKey.TITLE_SORT)
+            } catch (e: Exception) {
+                logE(e)
+                null
+            }
+        }
+
+    protected val artistNameSort: String?
+        get() {
+            return try {
+                getAudioFile(songPaths!![0]).tagOrCreateAndSetDefault.getFirst(FieldKey.ARTIST_SORT)
+            } catch (e: Exception) {
+                logE(e)
+                null
+            }
+        }
+
+    protected val albumTitleSort: String?
+        get() {
+            return try {
+                getAudioFile(songPaths!![0]).tagOrCreateAndSetDefault.getFirst(FieldKey.ALBUM_SORT)
+            } catch (e: Exception) {
+                logE(e)
+                null
+            }
+        }
+
+    protected val albumArtistSort: String?
+        get() {
+            return try {
+                getAudioFile(songPaths!![0]).tagOrCreateAndSetDefault.getFirst(FieldKey.ALBUM_ARTIST_SORT)
+            } catch (e: Exception) {
+                logE(e)
+                null
+            }
+        }
+
     private val pickArtworkImage =
         registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             loadImageFromFile(uri)

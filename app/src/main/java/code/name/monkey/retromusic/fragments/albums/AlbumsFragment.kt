@@ -1,3 +1,4 @@
+//ALBUM FRAGMENT BACKUP:
 /*
  * Copyright (c) 2020 Hemanth Savarla.
  *
@@ -125,6 +126,10 @@ class AlbumsFragment : AbsRecyclerViewCustomGridSizeFragment<AlbumAdapter, GridL
     }
 
     companion object {
+        // Add new sort constants
+        const val ALBUM_SORT_ORDER_ARTIST = "album_sort_order_artist"
+        const val ALBUM_SORT_ORDER_ARTIST_LAST_NAME = "album_sort_order_artist_last_name"
+
         fun newInstance(): AlbumsFragment {
             return AlbumsFragment()
         }
@@ -179,20 +184,34 @@ class AlbumsFragment : AbsRecyclerViewCustomGridSizeFragment<AlbumAdapter, GridL
             0,
             R.id.action_album_sort_order_artist,
             2,
+            R.string.sort_order_artist
+        ).isChecked =
+            currentSortOrder.equals(ALBUM_SORT_ORDER_ARTIST)
+        sortOrderMenu.add(
+            0,
+            R.id.action_album_sort_order_artist_last_name,
+            3,
+            R.string.sort_order_artist_last_name
+        ).isChecked =
+            currentSortOrder.equals(ALBUM_SORT_ORDER_ARTIST_LAST_NAME)
+        sortOrderMenu.add(
+            0,
+            R.id.action_album_sort_order_album_artist,
+            4,
             R.string.sort_order_album_artist
         ).isChecked =
             currentSortOrder.equals(AlbumSortOrder.ALBUM_ARTIST)
         sortOrderMenu.add(
             0,
             R.id.action_album_sort_order_year,
-            3,
+            5,
             R.string.sort_order_year
         ).isChecked =
             currentSortOrder.equals(AlbumSortOrder.ALBUM_YEAR)
         sortOrderMenu.add(
             0,
             R.id.action_album_sort_order_num_songs,
-            4,
+            6,
             R.string.sort_order_num_songs
         ).isChecked =
             currentSortOrder.equals(AlbumSortOrder.ALBUM_NUMBER_OF_SONGS)
@@ -270,7 +289,9 @@ class AlbumsFragment : AbsRecyclerViewCustomGridSizeFragment<AlbumAdapter, GridL
         val sortOrder: String = when (item.itemId) {
             R.id.action_album_sort_order_asc -> AlbumSortOrder.ALBUM_A_Z
             R.id.action_album_sort_order_desc -> AlbumSortOrder.ALBUM_Z_A
-            R.id.action_album_sort_order_artist -> AlbumSortOrder.ALBUM_ARTIST
+            R.id.action_album_sort_order_artist -> ALBUM_SORT_ORDER_ARTIST
+            R.id.action_album_sort_order_artist_last_name -> ALBUM_SORT_ORDER_ARTIST_LAST_NAME
+            R.id.action_album_sort_order_album_artist -> AlbumSortOrder.ALBUM_ARTIST
             R.id.action_album_sort_order_year -> AlbumSortOrder.ALBUM_YEAR
             R.id.action_album_sort_order_num_songs -> AlbumSortOrder.ALBUM_NUMBER_OF_SONGS
             else -> PreferenceUtil.albumSortOrder
