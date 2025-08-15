@@ -28,6 +28,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import java.io.File
+import code.name.monkey.retromusic.Constants.SMART_SKIP_BACK
 
 
 object PreferenceUtil {
@@ -346,6 +347,9 @@ object PreferenceUtil {
         )
 
     val isLockScreen get() = sharedPreferences.getBoolean(LOCK_SCREEN, false)
+
+    val isSmartSkipBack
+        get() = sharedPreferences.getBoolean(SMART_SKIP_BACK, true)
 
     @Suppress("deprecation")
     fun isAllowedToDownloadMetadata(context: Context): Boolean {

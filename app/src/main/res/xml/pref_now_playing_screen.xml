@@ -111,6 +111,14 @@
             app:summary="@string/pref_summary_expand_now_playing_panel"
             app:title="@string/pref_title_expand_now_playing_panel" />
 
+        <code.name.monkey.appthemehelper.common.prefs.supportv7.ATESwitchPreference
+            android:layout="@layout/list_item_view_switch"
+            app:defaultValue="true"
+            app:icon="@drawable/ic_skip_previous"
+            app:key="smart_skip_back"
+            app:summary="@string/pref_summary_smart_skip_back"
+            app:title="@string/pref_title_smart_skip_back" />
+
         <code.name.monkey.appthemehelper.common.prefs.supportv7.ATESeekBarPreference
             android:defaultValue="12"
             android:key="new_blur_amount"

@@ -170,7 +170,7 @@ class MediaSessionCallback(
 
     override fun onSkipToPrevious() {
         super.onSkipToPrevious()
-        musicService.playPreviousSong(true)
+        musicService.back(true)
     }
 
     override fun onStop() {

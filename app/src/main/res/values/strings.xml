@@ -576,4 +576,6 @@
     <string name="sort_order_artist_last_name">Artist (Last Name)</string>
     <string name="sort_order_a_z_last_name">A-Z (Last Name)</string>
     <string name="sort_order_z_a_last_name">Z-A (Last Name)</string>
+    <string name="pref_title_smart_skip_back">Smart skip back</string>
+    <string name="pref_summary_smart_skip_back">Skip to beginning if more than 2 seconds played, otherwise skip to previous song</string>
 </resources>

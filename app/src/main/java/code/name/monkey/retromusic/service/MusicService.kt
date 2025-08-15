@@ -84,6 +84,7 @@ import code.name.monkey.retromusic.util.PreferenceUtil.playbackPitch
 import code.name.monkey.retromusic.util.PreferenceUtil.playbackSpeed
 import code.name.monkey.retromusic.util.PreferenceUtil.registerOnSharedPreferenceChangedListener
 import code.name.monkey.retromusic.util.PreferenceUtil.unregisterOnSharedPreferenceChangedListener
+import code.name.monkey.retromusic.util.PreferenceUtil.isSmartSkipBack
 import code.name.monkey.retromusic.volume.AudioVolumeObserver
 import code.name.monkey.retromusic.volume.OnAudioVolumeChangedListener
 import com.bumptech.glide.Glide
@@ -386,7 +387,7 @@ class MusicService : MediaBrowserServiceCompat(),
     }
 
     fun back(force: Boolean) {
-        if (songProgressMillis > 2000) {
+        if (isSmartSkipBack && songProgressMillis > 2000) {
             seek(0)
         } else {
             playPreviousSong(force)
@@ -810,7 +811,7 @@ class MusicService : MediaBrowserServiceCompat(),
         playSongAt(getNextPosition(force))
     }
 
-    fun playPreviousSong(force: Boolean) {
+    private fun playPreviousSong(force: Boolean) {
         playSongAt(getPreviousPosition(force))
     }
 
